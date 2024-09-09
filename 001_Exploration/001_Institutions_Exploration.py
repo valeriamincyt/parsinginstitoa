@@ -14,11 +14,11 @@ ruta ='./'
 # -------> https://ror.readme.io/docs/data-dump
 ror = pd.read_json(f"{rutaDatos}/v1.50-2024-07-29-ror-data.json")
 
-ror = ror[ror.country.apply(lambda x: x['country_code'] == 'AR')]  #Me quedo sólo con las argentinas
+#ror = ror[ror.country.apply(lambda x: x['country_code'] == 'AR')]  #Me quedo sólo con las argentinas
 
 print(f'Cantidad de entidades argentinas en archivo v1 {ror.shape}')
-print('ror - Primeras 2: ')
-print(ror.head(2))
+print('ror: ')
+print(ror.sample())
 
 #Agregamos nueva información a la lista
 ror['alias_len'] = ror['aliases'].apply(len)
@@ -27,10 +27,11 @@ ror['labels_len'] = ror['labels'].apply(len)
 ror['address_len'] = ror['addresses'].apply(len)
 ror['address'] = ror['addresses'].apply(lambda x: x[0])
 ror['ror_id'] = ror['id'].apply(lambda x: x.split("/")[-1])
-ror['types'] = ror['types'].apply(lambda x: x[0])
+#ror['types'] = ror['types'].apply(lambda x: x[0])
+ror['types'] = ror['types'].apply(lambda x: x[0] if len(x)>0 else "")
 
-print('ror - primeras 2 con nuevas columnas de información')
-print(ror.head(2))
+print('ror - con nuevas columnas de información')
+print(ror.sample())
 
 # this file is not provided but the needed data is all institutions in OpenAlex
 # with the following columns: 'ror_id','affiliation_id'
@@ -523,6 +524,8 @@ city_region_country = art_empty_affs.sample(347).drop_duplicates()['original_aff
 
 artificial_empty_affs_DF = pd.DataFrame(zip(city_country+city_region_country),columns=['original_affiliation']).drop_duplicates(subset=['original_affiliation'])#\
 #    .to_parquet(f"{ruta}/artificial_empty_affs.parquet")
+print('artificial_empty_affs_DF: -----------------------------------------------')
+print(artificial_empty_affs_DF.sample())
 artificial_empty_affs_DF.to_parquet(f"{ruta}/artificial_empty_affs.parquet")
 
 print('artificial_empty_affs_DF: ')
@@ -542,9 +545,9 @@ ror_strings_Merge = ror_to_join_final.merge(insts, how='inner', on='ror_id')[['o
 
 print('ror_strings_Merge:')
 print(ror_strings_Merge.shape)
-print(ror_strings_Merge.head(1))
+print(ror_strings_Merge.sample())
 
 print('Armando ror_strings.parquet')
-ror_to_join_final.merge(insts, how='inner', on='ror_id')[['original_affiliation','affiliation_id']].to_parquet(f"{rutaDatos}/mag_and_ror_aff_strings_data/ror_strings.parquet")
+ror_strings_Merge.to_parquet(f"{rutaDatos}/mag_and_ror_aff_strings_data/ror_strings.parquet")
 
 print('FINALIZADO')
