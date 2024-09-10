@@ -109,6 +109,18 @@ print(less_than_df.shape)
 less_than_df[['original_affiliation', 'affiliation_id']].to_parquet(f"{iteration_save_path}lower_than_{num_samples_to_get}.parquet")
 print('Se crea el archivo' + f"{iteration_save_path}lower_than_{num_samples_to_get}.parquet")
 
+w1 = Window.partitionBy('affiliation_id').orderBy('random_prob')
+
+more_than = filled_affiliations.filter(F.col('id_count') >= num_samples_to_get) \
+.withColumn('row_number', F.row_number().over(w1)) \
+.filter(F.col('row_number') <= num_samples_to_get+25)
+
+print('more_than.cache().count(): ---------------------------------')
+print(more_than.cache().count())
+
+more_than.select('original_affiliation', 'affiliation_id').coalesce(1).write.mode('overwrite').parquet(f"{iteration_save_path}more_than_{num_samples_to_get}.parquet")
+print('Se crea el archivo ' + f"{iteration_save_path}more_than_{num_samples_to_get}.parquet")
+
 
 
 
