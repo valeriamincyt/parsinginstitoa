@@ -22,18 +22,18 @@ sqlContext = SQLContext(sc,spark)
 # These paths should be changed to wherever you want to save the general data and where you want to save
 # iteration specific data
 base_save_path = "./"
-iteration_save_path = "./institutional_affiliation_classification"
-rutaDatos = "../Datos"
+iteration_save_path = "./institutional_affiliation_classification/"
+rutaDatos = "../Datos/"
 
-institutions = spark.read.parquet(f"{rutaDatos}/OA_static_institutions_single_file.parquet") \
+institutions = spark.read.parquet(f"{rutaDatos}OA_static_institutions_single_file.parquet") \
     .filter(F.col('ror_id')!='')
 
 print('institutions.cache().count() --------------------------------------')
 print(institutions.cache().count())
 
-df_affil = pd.read_csv(f"{rutaDatos}/Insumos_M1/file_parts_20231201_arg.csv")
+df_affil = pd.read_csv(f"{rutaDatos}Insumos_M1/file_parts_20231201_arg.csv")
 df_affil = df_affil.rename(columns={'affiliation_ids': 'affiliation_id'})
-df_affil.to_parquet(f"{rutaDatos}/static_affiliations.parquet")
+df_affil.to_parquet(f"{rutaDatos}static_affiliations.parquet")
 
 print('Se crea el archivo static_affiliations.parquet con los datos de Insumos_M1/file_parts_20231201_arg.csv')
 
@@ -44,7 +44,7 @@ print(df_affil.columns)
 print('Primer registro: -------------------------------')
 df_affil.head(1)
 
-affiliations = spark.read.parquet(f"{rutaDatos}/static_affiliations.parquet")
+affiliations = spark.read.parquet(f"{rutaDatos}static_affiliations.parquet")
 
 print('affiliations.cache().count() --------------------------------------')
 print(affiliations.cache().count())
@@ -64,7 +64,7 @@ print('dedup_affs.columns: -----------------------------')
 print(dedup_affs.columns)
 dedup_affs.cache().count()
 
-ror_data = spark.read.parquet(f"{rutaDatos}/ror_strings.parquet").select('original_affiliation','affiliation_id')
+ror_data = spark.read.parquet(f"{rutaDatos}ror_strings.parquet").select('original_affiliation','affiliation_id')
 
 print('ror_data.cache().count(): ---------------------------------')
 print(ror_data.cache().count())
@@ -120,8 +120,6 @@ print(more_than.cache().count())
 
 more_than.select('original_affiliation', 'affiliation_id').coalesce(1).write.mode('overwrite').parquet(f"{iteration_save_path}more_than_{num_samples_to_get}.parquet")
 print('Se crea el archivo ' + f"{iteration_save_path}more_than_{num_samples_to_get}.parquet")
-
-
 
 
 print('FINALIZADO OK')
