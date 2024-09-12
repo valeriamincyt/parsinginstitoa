@@ -1,3 +1,4 @@
+import time
 import pickle
 import json
 import os
@@ -237,21 +238,33 @@ print("Done")
 
 ##Creating the Train Dataset   ####################
 
-%%time
+##%%time
+start_cpu_time = time.process_time()
+start_wall_time = time.time()
 for i in range(ceil(train_data.shape[0]/1000)): #500.000
     print(i)
     low = i*1000
     high = (i+1)*1000
     create_tfrecords_dataset(train_data.iloc[low:high,:], i, 'train')
+end_cpu_time = time.process_time()
+end_wall_time = time.time()
+print(f"CPU time used: {end_cpu_time - start_cpu_time} seconds")
+print(f"Elapsed time: {(end_wall_time - start_wall_time)*1000}  μs")
 
 #### Creating the Validation Dataset ######################33
 
-%%time
+##%%time
+start_cpu_time = time.process_time()
+start_wall_time = time.time()
 for i in range(ceil(val_data.shape[0]/3000)):
     print(i)
     low = i*3000
     high = (i+1)*3000
     create_tfrecords_dataset(val_data.iloc[low:high,:], i, 'val')
+end_cpu_time = time.process_time()
+end_wall_time = time.time()
+print(f"CPU time used: {end_cpu_time - start_cpu_time} seconds")
+print(f"Elapsed time: {(end_wall_time - start_wall_time)*1000}  μs")
 
 ### Loading the Data
 
@@ -402,3 +415,6 @@ history = model.fit(training_data, epochs=20, validation_data=validation_data, v
 json.dump(str(history.history), open(f"{filepath_1}_25EPOCHS_HISTORY.json", 'w+'))
 
 model.save(f"{filepath_1}basic_model.keras")
+print('Archivo del modelo guardado ---------')
+
+print('FINALIZADO')
