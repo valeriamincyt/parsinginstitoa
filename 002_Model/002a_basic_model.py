@@ -238,7 +238,7 @@ print("Done")
 
 ##Creating the Train Dataset   ####################
 
-##%%time
+##%%time --- es un comando de jupyter
 start_cpu_time = time.process_time()
 start_wall_time = time.time()
 for i in range(ceil(train_data.shape[0]/1000)): #500.000
@@ -386,7 +386,7 @@ with mirrored_strategy.scope():
     filepath_1 = f"{ruta}/models/{curr_date}_{dense_1}d1_{dense_2}d2/" \
 
 
-    filepath = filepath_1 + "model_epoch{epoch:02d}ckpt"
+    filepath = filepath_1 + "model_epoch{epoch:02d}ckpt.keras"
 
     # Adding in checkpointing
     model_checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath, monitor='val_loss',
