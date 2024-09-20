@@ -13,9 +13,10 @@ from collections import Counter
 from math import ceil
 from sklearn.model_selection import train_test_split
 
-rutaDatos = "../Datos/"
+rutaDatos = "../Datos"
 iteration_save_path = "./institutional_affiliation_classification/"
 ruta = "./"
+train_data_path = "./training_data"
 num_samples_to_get =  50
 
 # HuggingFace library to train a tokenizer
@@ -196,7 +197,7 @@ def create_tfrecords_dataset(data, iter_num, dataset_type='train'):
     
     serialized_features_dataset = ds.map(tf_serialize_example)
     
-    filename = f"./training_data/{dataset_type}/{str(iter_num).zfill(4)}.tfrecord"
+    filename = f"{train_data_path}/{dataset_type}/{str(iter_num).zfill(4)}.tfrecord"
     writer = tf.data.experimental.TFRecordWriter(filename)
     writer.write(serialized_features_dataset)
 
@@ -232,8 +233,8 @@ train_data['original_affiliation_model_input'] = train_data['original_affiliatio
 
 val_data['original_affiliation_model_input'] = val_data['original_affiliation_model_input'].apply(lambda x: np.asarray(x, dtype=np.int64))
 
-os.system(f"mkdir -p {ruta}/training_data/train/")
-os.system(f"mkdir -p {ruta}/training_data/val/")
+os.system(f"mkdir -p {train_data_path}/train/")
+os.system(f"mkdir -p {train_data_path}/val/")
 print("Done")
 
 ##Creating the Train Dataset   ####################
@@ -290,7 +291,7 @@ def get_dataset(path, data_type='train'):
     """
     Takes in a path to the TFRecords and returns a TF Dataset to be used for training.
     """
-    tfrecords = [f"{path}{data_type}/{x}" for x in os.listdir(f"{path}{data_type}/") if x.endswith('tfrecord')]
+    tfrecords = [f"{path}/{data_type}/{x}" for x in os.listdir(f"{path}/{data_type}/") if x.endswith('tfrecord')]
     tfrecords.sort()
 
 
@@ -300,7 +301,6 @@ def get_dataset(path, data_type='train'):
     parsed_dataset = parsed_dataset.apply(tf.data.experimental.dense_to_ragged_batch(512,drop_remainder=True))
     return parsed_dataset
 
-train_data_path = f"{ruta}/training_data/"
 
 training_data = get_dataset(train_data_path, data_type='train')
 validation_data = get_dataset(train_data_path, data_type='val')
