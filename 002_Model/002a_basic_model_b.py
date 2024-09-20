@@ -14,7 +14,7 @@ from math import ceil
 from sklearn.model_selection import train_test_split
 
 rutaDatos = "../Datos"
-iteration_save_path = "./institutional_affiliation_classification/"
+iteration_save_path = "./institutional_affiliation_classification"
 ruta = "./"
 train_data_path = "./training_data"
 num_samples_to_get =  50
@@ -343,7 +343,8 @@ def scheduler(epoch, curr_lr):
     return lr(epoch, start_lr, rampup_epochs, exp_decay)
 
 # Allow for use of multiple GPUs
-mirrored_strategy = tf.distribute.MirroredStrategy()
+# mirrored_strategy = tf.distribute.MirroredStrategy()
+mirrored_strategy = tf.distribute.MirroredStrategy(["CPU:0", "CPU:1", "CPU:2", "CPU:3", "CPU:4", "CPU:5"])
 #mirrored_strategy = tf.distribute.MirroredStrategy(["CPU:0", "CPU:1"])
 
 with mirrored_strategy.scope():
