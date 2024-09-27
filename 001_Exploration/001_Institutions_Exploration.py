@@ -1,3 +1,8 @@
+#
+#!pip3 install --upgrade pip
+#!pip3 install unidecode
+#
+
 import pandas as pd
 pd.set_option("display.max_colwidth", None)
 pd.set_option("display.max_columns", None)
@@ -16,9 +21,9 @@ ror = pd.read_json(f"{rutaDatos}/v1.50-2024-07-29-ror-data.json")
 
 #ror = ror[ror.country.apply(lambda x: x['country_code'] == 'AR')]  #Me quedo sólo con las argentinas
 
-print(f'Cantidad de entidades argentinas en archivo v1 {ror.shape}')
+print(f'Cantidad de entidades argentinas en archivo v1 {ror.shape} ---------------------------------------------------')
 print('ror: ')
-print(ror.sample())
+print(ror.sample(2))
 
 #Agregamos nueva información a la lista
 ror['alias_len'] = ror['aliases'].apply(len)
@@ -30,15 +35,18 @@ ror['ror_id'] = ror['id'].apply(lambda x: x.split("/")[-1])
 #ror['types'] = ror['types'].apply(lambda x: x[0])
 ror['types'] = ror['types'].apply(lambda x: x[0] if len(x)>0 else "")
 
-print('ror - con nuevas columnas de información')
-print(ror.sample())
+print('ror - con nuevas columnas de información: ------------------------------------------')
+print(ror.sample(2))
 
 # this file is not provided but the needed data is all institutions in OpenAlex
 # with the following columns: 'ror_id','affiliation_id'
 insts = pd.read_parquet(f"{rutaDatos}/OA_static_institutions_single_file.parquet",columns=['affiliation_id','ror_id'])
-print(f'Cantidad entidades en OA_static_institutions_single_file.parque {insts.shape}')
-print('insts - Primeras 2: ')
-print(f'{insts.head(2)}')
+insts['affiliation_id'] = insts['affiliation_id'].apply(lambda x: x.split("/")[-1])
+insts['ror_id'] = insts['ror_id'].apply(lambda x: x.split("/")[-1])
+
+print(f'Cantidad entidades en OA_static_institutions_single_file.parque {insts.shape} ----------------------------------------------------')
+print('insts ---------------------------------------------: ')
+print(f'{insts.sample(2)}')
 
 ror_to_join = ror[['ror_id','name','aliases','acronyms','labels','country','types','address','alias_len','acronyms_len','labels_len','address_len']].copy()
 
@@ -57,8 +65,8 @@ ror_to_join['state'] = ror_to_join['address'].apply(lambda x: x['state'])
 ror_to_join['region'] = ror_to_join['address'].apply(get_geoname_admin)
 ror_to_join['institution'] = ror_to_join['name']
 
-print('ror_to_join:')
-print(ror_to_join.head(2))
+print('ror_to_join: --------------------------------------------')
+print(ror_to_join.sample(2))
 
 codes_to_ignore = ['ja','fa','hi','ko','bn','zh','ml','ru','el','kn','gu','mk','ne','te','hy',\
                    'km','ti','kk','th','my','uk','pa','bg','ur','vi','ar','sr','he','ta','ka',\
@@ -69,7 +77,7 @@ labels['label'] = labels['labels'].apply(lambda x: x['label'])
 labels['iso639'] = labels['labels'].apply(lambda x: x['iso639'])
 
 print('labels')
-print(labels[~labels['iso639'].isin(codes_to_ignore)].sample(20))
+print(labels[~labels['iso639'].isin(codes_to_ignore)].sample(2))
 
 # Getting string beginnings
 # Looking to introduce more variety into the artificial strings so that they include some header information such as "College of .." or "Department of...".
@@ -504,13 +512,17 @@ ror_to_join['aff_string'] = ror_to_join.apply(lambda x: create_affiliation_strin
 ror_to_join['aff_string_len'] = ror_to_join['aff_string'].apply(len)
 ror_to_join_final = ror_to_join.explode("aff_string").copy()
 
+print('ror_to_join: ---------------------------------------')
+print(ror_to_join.shape)
+print(ror_to_join.sample(3))
+
 # Looking to quickly get combinations of city/region/country
 
 art_empty_affs = ror_to_join[['city','region','country_name']].dropna().copy()
 
-print('art_empty_affs: ')
+print('art_empty_affs: -----------------------------------------')
 print(art_empty_affs.shape)
-print(art_empty_affs.sample(10))
+print(art_empty_affs.sample(2))
 
 art_empty_affs['original_affiliation_1'] = art_empty_affs.apply(lambda x: f"{x.city}, {x.country_name}", axis=1)
 
@@ -525,27 +537,32 @@ city_region_country = art_empty_affs.sample(347).drop_duplicates()['original_aff
 artificial_empty_affs_DF = pd.DataFrame(zip(city_country+city_region_country),columns=['original_affiliation']).drop_duplicates(subset=['original_affiliation'])#\
 #    .to_parquet(f"{ruta}/artificial_empty_affs.parquet")
 print('artificial_empty_affs_DF: -----------------------------------------------')
-print(artificial_empty_affs_DF.sample())
-artificial_empty_affs_DF.to_parquet(f"{ruta}/artificial_empty_affs.parquet")
-
-print('artificial_empty_affs_DF: ')
 print(artificial_empty_affs_DF.shape)
-print(artificial_empty_affs_DF.head(1))
+print(artificial_empty_affs_DF.sample(2))
+artificial_empty_affs_DF.to_parquet(f"{rutaDatos}/artificial_empty_affs.parquet")
+
+print('artificial_empty_affs_DF: ---------------------------------------------')
+print(artificial_empty_affs_DF.shape)
+print(artificial_empty_affs_DF.sample(2))
 
 ror_to_join_final = ror_to_join[['ror_id','aff_string']].explode("aff_string").copy()
-print('ror_to_join_final:')
+print('ror_to_join_final: ------------------------------------')
 print(ror_to_join_final.shape)
-print(ror_to_join_final.head(1))
+print(ror_to_join_final.sample(2))
 
 ror_to_join_final['original_affiliation'] = ror_to_join_final['aff_string'].apply(lambda x: x[0])
-print('ror_to_join_final: ')
-print(print(ror_to_join_final.head(2)))
+print('ror_to_join_final: --------------------------------------')
+print(print(ror_to_join_final.sample(2)))
+
+print('insts: -------------------------------')
+print(insts.shape)
+print(insts.sample(2))
 
 ror_strings_Merge = ror_to_join_final.merge(insts, how='inner', on='ror_id')[['original_affiliation','affiliation_id']]
 
-print('ror_strings_Merge:')
+print('ror_strings_Merge: -------------------------------')
 print(ror_strings_Merge.shape)
-print(ror_strings_Merge.sample())
+print(ror_strings_Merge.sample(2)) #Esta devolviendo 0 registros
 
 print('Armando ror_strings.parquet')
 ror_strings_Merge.to_parquet(f"{rutaDatos}/mag_and_ror_aff_strings_data/ror_strings.parquet")

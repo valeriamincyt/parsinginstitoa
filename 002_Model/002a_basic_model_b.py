@@ -13,6 +13,8 @@ from collections import Counter
 from math import ceil
 from sklearn.model_selection import train_test_split
 
+#print(tf.__version__)
+
 rutaDatos = "../Datos"
 iteration_save_path = "./institutional_affiliation_classification"
 ruta = "./"
@@ -198,7 +200,11 @@ def create_tfrecords_dataset(data, iter_num, dataset_type='train'):
     serialized_features_dataset = ds.map(tf_serialize_example)
     
     filename = f"{train_data_path}/{dataset_type}/{str(iter_num).zfill(4)}.tfrecord"
-    writer = tf.data.experimental.TFRecordWriter(filename)
+    
+    #writer = tf.data.experimental.TFRecordWriter(filename) #  is deprecated 
+    #writer.write(serialized_features_dataset) #  is deprecated 
+    #Se reemplaza por
+    writer = tf.io.TFRecordWriter(filename)
     writer.write(serialized_features_dataset)
 
 def tf_serialize_example(f0, f1):
